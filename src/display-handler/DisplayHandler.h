@@ -2,19 +2,30 @@
 #define DISPLAYHANDLER_H
 
 #include <SPI.h>
-#include "SH1106_SPI.h"
-#include "Fonts.h"
+#include "../sh1106-spi/SH1106_SPI.h"
+#include "Graphics.h"
 #include "TextPrinter.h"
+
+enum DataTitle
+{
+	DISTANCE,
+	MAX_SPEED
+};
 
 class DisplayHandler
 {
-  public:
-    void begin();
-    void drawDivider();
-    void drawFilename();
+	public:
+		void begin();
+		void drawFilename(char* filename);
+		void drawBluetoothIcon();
+		void drawGpsIcon();
+		void drawDataTitle(DataTitle titleText);
     
-  private:
-    SH1106_SPI lcd;
+	private:
+		void drawHeader();
+		void drawData();
+		void drawDivider();
+		SH1106_SPI lcd;
 };
 
 #endif

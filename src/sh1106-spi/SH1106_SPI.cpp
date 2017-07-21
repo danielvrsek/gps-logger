@@ -82,7 +82,7 @@ uint8_t SH1106_SPI::gotoXY(uint8_t x, uint8_t y)
 
 uint8_t SH1106_SPI::writeBitmap(const uint8_t *bitmap, uint8_t x, uint8_t y, uint8_t width, uint8_t height)
 {	
-	if (this->gotoXY(x, y / 8) == SH1106_ERROR) return SH1106_ERROR;	
+	if (this->gotoXY(x, y) == SH1106_ERROR) return SH1106_ERROR;	
 	const uint8_t *maxY = bitmap + height * width / 8;	
 
 	for (const uint8_t *line = bitmap; line < maxY; line += width)
@@ -113,7 +113,7 @@ void SH1106_SPI::writeLcd(uint8_t dataOrCommand, const uint8_t *data, uint16_t c
 
     for (uint16_t i = count; i > 0; i--)
 	{
-		SPI.transfer(pgm_read_word(&data[count-i]));
+		SPI.transfer(data[count-i]);
 		//SPDR = *data++;
 		//while (!(SPSR & _BV(SPIF)));
 	}

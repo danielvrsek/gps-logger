@@ -1,40 +1,70 @@
 #include "DisplayHandler.h"
 
-byte array [][3] = 
-{
-  { 0x00, 0x00, 0x00 },
-  { 0x01, 0x01, 0x01 },
-  { 0x02, 0x02, 0x02 }
-};
-
 void DisplayHandler::begin()
 {
-  lcd.begin();
+	lcd.begin();
+	
+	drawHeader();
+	drawData();
+}
 
-  drawDivider();
-  drawFilename();
+void DisplayHandler::drawHeader()
+{
+	char filename[] = "TRACK000";
+	drawFilename(filename);
+	drawBluetoothIcon();
+	drawGpsIcon();
+	drawDivider();
+}
 
-  BluetoothIcon btIcon = BluetoothIcon();
-  IconPrinter iconPrinter = IconPrinter(&lcd);
-  iconPrinter.print(Point(105, 0), &btIcon);
+void DisplayHandler::drawData()
+{
+	drawDataTitle(MAX_SPEED);
+}
+
+void DisplayHandler::drawDataTitle(DataTitle dataTitle)
+{
+	TextPrinter printer = TextPrinter(&lcd);
+	MainFont mainFont = MainFont();
+
+	switch (dataTitle)
+	{
+		case DISTANCE: printer.print("DISTANCE", Point(48, 24), &mainFont);
+			break;
+		case MAX_SPEED: printer.print("MAX SPEED", Point(46, 24), &mainFont, 2);
+			break;
+	}
 }
 
 void DisplayHandler::drawDivider()
 {
-  byte x = 0;
-  byte y = 2;
-  
-  while (x < SH1106_X_PIXELS)
-  {
-    Serial.print(lcd.gotoXY(x++, y));
-    lcd.writeLcd(SH1106_DATA, 0x03);
-  }
+	byte x = 0, y = 2;
+	
+	while (x < SH1106_X_PIXELS)
+	{
+		lcd.gotoXY(x++, y);
+		lcd.writeLcd(SH1106_DATA, 0x03);
+	}
 }
 
-void DisplayHandler::drawFilename()
+void DisplayHandler::drawGpsIcon()
+{	
+	GpsIcon gpsIcon = GpsIcon();
+	IconPrinter iconPrinter = IconPrinter(&lcd);
+	iconPrinter.print(Point(118, 0), &gpsIcon);
+}
+
+void DisplayHandler::drawBluetoothIcon()
 {
-  TextPrinter printer = TextPrinter(&lcd);
-  MainFont mainFont = MainFont();
-  printer.print("TRCK0000", Point(0, 0), &mainFont);
+	BluetoothIcon btIcon = BluetoothIcon();
+	IconPrinter iconPrinter = IconPrinter(&lcd);
+	iconPrinter.print(Point(105, 0), &btIcon);
+}
+
+void DisplayHandler::drawFilename(char* filename)
+{
+	TextPrinter printer = TextPrinter(&lcd);
+	MainFont mainFont = MainFont();
+	printer.print(filename, Point(0, 2), &mainFont);
 }
 
