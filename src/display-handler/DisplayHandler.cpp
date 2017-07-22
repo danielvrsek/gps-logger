@@ -19,21 +19,56 @@ void DisplayHandler::drawHeader()
 
 void DisplayHandler::drawData()
 {
-	drawDataTitle(MAX_SPEED);
+	drawDataTitle(DISTANCE);
+	
+	drawSpeed(0);
+	drawSpeedUnits();
+	drawData(0, 1);
+	drawDataUnits();
 }
 
 void DisplayHandler::drawDataTitle(DataTitle dataTitle)
 {
-	TextPrinter printer = TextPrinter(&lcd);
+	char distance_text[] = "DISTANCE";
+	char maxspeed_text[] = "MAX SPEED";
+	
 	MainFont mainFont = MainFont();
 
 	switch (dataTitle)
 	{
-		case DISTANCE: printer.print("DISTANCE", Point(48, 24), &mainFont);
+		case DISTANCE: textPrinter.print(distance_text, Point(48, 24), &mainFont);
 			break;
-		case MAX_SPEED: printer.print("MAX SPEED", Point(46, 24), &mainFont, 2);
+		case MAX_SPEED: textPrinter.print(maxspeed_text, Point(46, 24), &mainFont, 2);
 			break;
 	}
+}
+
+void DisplayHandler::drawSpeed(uint8_t speed)
+{
+	if (speed > 99) return;
+	
+	char speedChars[3];
+	
+	byte index = 0;
+	
+	uint8_t tens = speed % 100 / 10;
+	uint8_t hundreds = speed % 1000 / 100;
+	
+	speedChars[index++] = speed % 10 + 48;
+	speedChars[index++] = tens + 48;
+	if (hundreds > 0)
+		speedChars[index++] = hundreds;
+	
+	speedChars[index] = '\0';
+	
+	SpeedFont speedFont = SpeedFont();
+	textPrinter.print(speedChars, Point(39, 24), &speedFont, 2, true, 16);
+}
+
+void DisplayHandler::drawSpeedUnits()
+{
+	UnitsFont unitsFont = UnitsFont();
+	textPrinter.print("km/h", Point(7, 51), &unitsFont, 0);
 }
 
 void DisplayHandler::drawDivider()
@@ -47,6 +82,48 @@ void DisplayHandler::drawDivider()
 	}
 }
 
+void DisplayHandler::drawData(uint32_t data, uint8_t decimalPlaces)
+{	
+	if (data > 99999) return;
+
+	char dataChars[7];
+	
+	byte index = 0;
+	if (decimalPlaces > 0)
+	{
+		for (uint8_t i = 0; i < decimalPlaces; i++)
+		{
+			dataChars[index++] = data % 10 + 48;
+			data = data / 10;
+		}
+		dataChars[index++] = ',';
+	}
+
+	uint8_t tens = data % 100 / 10;
+	uint8_t hundreds = data % 1000 / 100;
+	uint16_t thousands = data % 10000 / 1000;
+	
+	dataChars[index++] = data % 10 + 48;
+	if (tens > 0)
+		dataChars[index++] = tens + 48;
+	if (hundreds > 0)
+		dataChars[index++] = hundreds + 48;
+	if (thousands > 0)
+		dataChars[index++] = thousands + 48;
+	
+	dataChars[index] = '\0';
+	
+	DataFont dataFont = DataFont();
+	lcd.clearArea(50, 44, 56, 17);
+	textPrinter.print(dataChars, Point(106, 44), &dataFont, 2, true);
+}
+
+void DisplayHandler::drawDataUnits()
+{
+	UnitsFont unitsFont = UnitsFont();
+	textPrinter.print("km", Point(109, 47), &unitsFont, 0);
+}
+
 void DisplayHandler::drawGpsIcon()
 {	
 	GpsIcon gpsIcon = GpsIcon();
@@ -57,7 +134,6 @@ void DisplayHandler::drawGpsIcon()
 void DisplayHandler::drawBluetoothIcon()
 {
 	BluetoothIcon btIcon = BluetoothIcon();
-	IconPrinter iconPrinter = IconPrinter(&lcd);
 	iconPrinter.print(Point(105, 0), &btIcon);
 }
 
@@ -65,6 +141,7 @@ void DisplayHandler::drawFilename(char* filename)
 {
 	TextPrinter printer = TextPrinter(&lcd);
 	MainFont mainFont = MainFont();
-	printer.print(filename, Point(0, 2), &mainFont);
+	//lcd.clearArea(0, 3, 80, 11);
+	textPrinter.print(filename, Point(0, 2), &mainFont);
 }
 

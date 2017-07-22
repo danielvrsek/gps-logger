@@ -20,12 +20,18 @@ class DisplayHandler
 		void drawBluetoothIcon();
 		void drawGpsIcon();
 		void drawDataTitle(DataTitle titleText);
-    
+		void drawData(uint32_t data, uint8_t decimalPlaces);
+		void drawSpeed(uint8_t speed);
+		
 	private:
 		void drawHeader();
 		void drawData();
 		void drawDivider();
+		void drawSpeedUnits();
+		void drawDataUnits();
 		SH1106_SPI lcd;
+		TextPrinter textPrinter = TextPrinter(&lcd);
+		IconPrinter iconPrinter = IconPrinter(&lcd);
 };
 
 #endif

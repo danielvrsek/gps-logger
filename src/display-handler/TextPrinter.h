@@ -18,6 +18,7 @@ class Printer
 	protected:
 		Printer(SH1106_SPI* lcd) : p_lcd(lcd) { }
 		void offsetBitmapVertically(Bitmap* bitmap, uint8_t offset);
+		void clearBitmapArea(Font* p_font, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 		SH1106_SPI* p_lcd;
 };
 
@@ -25,7 +26,7 @@ class TextPrinter : public Printer
 {
 	public:
 		TextPrinter(SH1106_SPI* p_lcd) : Printer(p_lcd) { }
-		void print(const char *str, Point p, Font* p_font, uint8_t horizontalOffset = 2);
+		void print(char *str, Point p, Font* p_font, uint8_t horizontalOffset = 2, bool alignRight = false, uint8_t fixedWidth = 0);
 };
 
 class IconPrinter : public Printer

@@ -66,6 +66,20 @@ void SH1106_SPI::clear()
 	this->gotoXY(0, 0);
 }
 
+uint8_t SH1106_SPI::clearArea(uint8_t x, uint8_t y, uint8_t width, uint8_t height)
+{	
+	if (height % 8 != 0)
+		height = (height / 8) + 1;
+	
+	for (uint8_t j = height; j > 0; j--)
+	{
+		this->gotoXY(x, y / 8 + j - 1);
+		for (uint8_t i = width; i > 0; i--)
+			this->writeLcd(SH1106_DATA, 0x00);
+	}
+	this->gotoXY(0, 0);
+}
+
 uint8_t SH1106_SPI::gotoXY(uint8_t x, uint8_t y) 
 {
 	if (x >= SH1106_X_PIXELS || y >= SH1106_ROWS) return SH1106_ERROR;
@@ -82,11 +96,16 @@ uint8_t SH1106_SPI::gotoXY(uint8_t x, uint8_t y)
 
 uint8_t SH1106_SPI::writeBitmap(const uint8_t *bitmap, uint8_t x, uint8_t y, uint8_t width, uint8_t height)
 {	
-	if (this->gotoXY(x, y) == SH1106_ERROR) return SH1106_ERROR;	
-	const uint8_t *maxY = bitmap + height * width / 8;	
-
+	if (this->gotoXY(x, y) == SH1106_ERROR) return SH1106_ERROR;
+	
+	if (height % 8 != 0)
+		height = (height / 8) + 1;
+	
+	const uint8_t *maxY = bitmap + height * width;	
+	
 	for (const uint8_t *line = bitmap; line < maxY; line += width)
 	{	
+		
 		this->writeLcd(SH1106_DATA, line, width);
 		this->gotoXY(this->m_Column, this->m_Line + 1);
 	}

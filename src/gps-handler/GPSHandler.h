@@ -35,8 +35,8 @@
 class GPSHandler
 {
   public:
-    GPSHandler();
     void loop();
+	void begin();
    
   private:
     bool isGPSReady();

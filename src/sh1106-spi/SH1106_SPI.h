@@ -76,6 +76,7 @@ public:
 	///***************************************************************************************************************
 	void begin(bool invert = false, bool fastSpi = false, uint8_t contrast = 128, uint8_t Vpp = 0);
 	void clear();
+	uint8_t clearArea(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 	uint8_t gotoXY(uint8_t x, uint8_t y);
 	uint8_t writeBitmap(const uint8_t *bitmap, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 	//void init(void);
