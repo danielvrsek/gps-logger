@@ -2,19 +2,10 @@
 
 int freeRam();
 
-GPSHandler::~GPSHandler()
-{
-	delete sdRepository;
-	delete gpsRepository;
-	delete functionButtonHandler;
-}
-
 void GPSHandler::begin()
 {
 	writeTimer = fixLedTimer = gpsFixTimer = 0;
 	
-	sdRepository = new SDDataRepository(SDFileService::Instance());
-	gpsRepository = new GPSDataRepository(&gps);
 	functionButtonHandler = new FunctionButtonHandler(this);
 	statusLedHandler = StatusLedHandler::Instance();
 	
@@ -49,7 +40,10 @@ void GPSHandler::loop()
   
 	if (isGPSReady() && isTimeToWrite()) 
 	{
-		sdRepository->writeNewPoint(gpsRepository->getCurrentPoint());
+		GPSDataRepository gpsRepository = GPSDataRepository(&gps);
+		SDDataRepository sdRepository = SDDataRepository(SDFileService::Instance());
+		
+		sdRepository.writeNewPoint(gpsRepository.getCurrentPoint());
 	}
 }
 
@@ -110,15 +104,26 @@ void GPSHandler::displayGPSPoint(GPSPoint gpsPoint)
 
 void GPSHandler::onNewPoiPressed()
 {
-	GPSPoint point = gpsRepository->getCurrentPoint();
+	GPSDataRepository gpsRepository = GPSDataRepository(&gps);
+	SDDataRepository sdRepository = SDDataRepository(SDFileService::Instance());
+	
+	GPSPoint point = gpsRepository.getCurrentPoint();
 	GPSWaypoint* p_waypoint = (GPSWaypoint*)&point;
 	
 	p_waypoint->waypointType = WaypointType::Poi;
 
-	sdRepository->writeNewWaypoint(*p_waypoint);
+	sdRepository.writeNewWaypoint(*p_waypoint);
 }
 
 void GPSHandler::onNewTrackingPressed()
 {
-	sdRepository->createNewTrack(gpsRepository->getCurrentPoint());
+	GPSDataRepository gpsRepository = GPSDataRepository(&gps);
+	SDDataRepository sdRepository = SDDataRepository(SDFileService::Instance());
+	
+	sdRepository.createNewTrack(gpsRepository.getCurrentPoint());
+}
+
+GPSHandler::~GPSHandler()
+{
+	delete functionButtonHandler;
 }

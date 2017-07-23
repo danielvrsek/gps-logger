@@ -42,8 +42,6 @@ class GPSHandler
 
 		FunctionButtonHandler* functionButtonHandler;
 		StatusLedHandler* statusLedHandler;
-		GPSDataRepository* gpsRepository;
-		SDDataRepository* sdRepository;
 		TinyGPSPlus gps;
 		byte gpsPrecision, gpsWriteDelay, gpsFixTimeout;
 		unsigned long writeTimer, fixLedTimer, gpsFixTimer;
