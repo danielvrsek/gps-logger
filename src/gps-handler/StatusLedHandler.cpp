@@ -11,7 +11,7 @@ StatusLedHandler::StatusLedHandler() :
   digitalWrite(STATUS_LED, LOW);
 }
 
-void StatusLedHandler::handle()
+void StatusLedHandler::loop()
 {  
   if (mAmount == 0) return;
 
@@ -35,7 +35,7 @@ void StatusLedHandler::blinkError(byte amount)
   
   while(mAmount)
   {
-    handle();
+    loop();
   }
 }
 

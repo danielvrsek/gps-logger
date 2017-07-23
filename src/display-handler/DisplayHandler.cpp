@@ -5,7 +5,7 @@ void DisplayHandler::begin()
 	lcd.begin();
 	
 	drawHeader();
-	drawData();
+	drawDefaultData();
 }
 
 void DisplayHandler::drawHeader()
@@ -17,7 +17,7 @@ void DisplayHandler::drawHeader()
 	drawDivider();
 }
 
-void DisplayHandler::drawData()
+void DisplayHandler::drawDefaultData()
 {
 	drawDataTitle(DISTANCE);
 	
@@ -67,8 +67,10 @@ void DisplayHandler::drawSpeed(uint8_t speed)
 
 void DisplayHandler::drawSpeedUnits()
 {
+	char units[] = "km/h";
+	
 	UnitsFont unitsFont = UnitsFont();
-	textPrinter.print("km/h", Point(7, 51), &unitsFont, 0);
+	textPrinter.print(units, Point(7, 51), &unitsFont, 0);
 }
 
 void DisplayHandler::drawDivider()
@@ -120,8 +122,10 @@ void DisplayHandler::drawData(uint32_t data, uint8_t decimalPlaces)
 
 void DisplayHandler::drawDataUnits()
 {
+	char units[] = "km";
+	
 	UnitsFont unitsFont = UnitsFont();
-	textPrinter.print("km", Point(109, 47), &unitsFont, 0);
+	textPrinter.print(units, Point(109, 47), &unitsFont, 0);
 }
 
 void DisplayHandler::drawGpsIcon()

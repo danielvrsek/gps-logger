@@ -25,7 +25,7 @@ class DisplayHandler
 		
 	private:
 		void drawHeader();
-		void drawData();
+		void drawDefaultData();
 		void drawDivider();
 		void drawSpeedUnits();
 		void drawDataUnits();

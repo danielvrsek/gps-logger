@@ -1,24 +1,22 @@
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#ifndef CONFIGURATIONDATAREPOSITORY_H
+#define CONFIGURATIONDATAREPOSITORY_H
 
 #include "Arduino.h"
-#include "../eeprom/EEPROM_I2C.h"
-#include "ErrorHandler.h"
+#include <EEPROM.h>
 
-
-#define FILE_COUNTER_ADDRESS 0xf00
+#define FILE_COUNTER_ADDRESS 0x00
 #define FILE_COUNTER_SIZE 2
 #define FILE_COUNTER_DEFAULT 0
 
-#define GPS_PRECISION_MIN_ADDRESS 0xf02
+#define GPS_PRECISION_MIN_ADDRESS 0x02
 #define GPS_PRECISION_MIN_SIZE 1
 #define GPS_PRECISION_MIN_DEFAULT 5
 
-#define GPS_WRITE_DELAY_ADDRESS 0xf03
+#define GPS_WRITE_DELAY_ADDRESS 0x03
 #define GPS_WRITE_DELAY_SIZE 1
 #define GPS_WRITE_DELAY_DEFAULT 10
 
-#define GPS_FIX_MAX_ADDRESS 0xf04
+#define GPS_FIX_MAX_ADDRESS 0x04
 #define GPS_FIX_MAX_SIZE 1
 #define GPS_FIX_MAX_DEFAULT 20
 
@@ -32,9 +30,6 @@ struct ConfigData
   protected:
     uint16_t readValueFromMemory(uint16_t address, byte size);
     void writeValueToMemory(uint16_t address, uint16_t data, byte size);
-
-  private:
-    static EEPROM_I2C eeprom;
 };
 
 struct FileCounter : public ConfigData
@@ -69,7 +64,7 @@ struct GPSFixTimeout : public ConfigData
     void setDefault() { writeValueToMemory(GPS_FIX_MAX_ADDRESS, GPS_FIX_MAX_DEFAULT, GPS_FIX_MAX_SIZE); }
 };
 
-class Configuration
+class ConfigurationDataRepository
 {
   public:
     FileCounter fileCounter;

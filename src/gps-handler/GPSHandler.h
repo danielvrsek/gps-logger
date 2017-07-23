@@ -1,11 +1,17 @@
+class GPSHandler;
+
 #ifndef GPSHANDLER_H
 #define GPSHANDLER_H
 
 #include "Arduino.h"
-#include "GPSDataHandler.h"
 #include "ErrorHandler.h"
 #include "StatusLedHandler.h"
-#include "../tiny-gps/TinyGPS++.h"
+#include "FunctionButtonHandler.h"
+#include "GPSDataModel.h"
+#include "GPSDataRepository.h"
+#include "SDDataRepository.h"
+#include "SDFileService.h"
+#include "ConfigurationDataRepository.h"
 
 // Receive pin for SoftwareSerial
 #define GPS_RX_PIN 5
@@ -14,52 +20,34 @@
 // Pin, where FIX led is connected
 #define FIX_LED 5
 
-// Time that button needs to be pressed to start a new tracking
-#define NEW_TRACKING_SET_DELAY 3000
-// Time that LED is on after the new tracking started
-#define NEW_TRACKING_LED_DELAY 250
-
-#define WRITE_CONFIRM_LED_DELAY 200
-
-// Time that button needs to be pressed to save a POI
-#define NEW_POI_SET_DELAY 350
-// Time that LED is on after the POI was saved
-#define NEW_POI_LED_DELAY 250
-
-// Pin, where a function button is connected
-#define FUNCTION_BUTTON_PIN 3
-
 // Fix led blinks while gps is not fixed
 #define FIX_LED_DELAY 300
 
 class GPSHandler
 {
-  public:
-    void loop();
-	void begin();
+	public:
+		~GPSHandler();
+		
+		void loop();
+		void begin();
+	
+		void onNewTrackingPressed();
+		void onNewPoiPressed();
    
-  private:
-    bool isGPSReady();
-    bool isWriteTimerReady();
-    void displayGPSPoint(GPSPoint gpsPoint);
-    GPSPoint getCurrentPoint();
-    GPSPosition getCurrentPosition();
-    GPSDate getCurrentDate();
-    GPSTime getCurrentTime();
-    char* getCurrentUtcTime();
-    void fixLedHandle(); 
-    void functionButtonHandle();
+	private:
+		bool isGPSReady();
+		bool isTimeToWrite();
+		void displayGPSPoint(GPSPoint gpsPoint);
+		void fixLedHandle();
 
-    void statusLed_Handler();
-    void fixLed_Handler();
-    void newTrackingPressed_Handler();
-
-    TinyGPSPlus gps;
-    GPSDataHandler dataHandler;
-    byte gpsPrecision, gpsWriteDelay, gpsFixTimeout;
-    unsigned long writeTimer, fixLedTimer, gpsFixTimer, functionButtonTimer;
-    bool functionButtonPressed, trackIndicator, waypointIndicator;
-    bool gpsFixed = false;
+		FunctionButtonHandler* functionButtonHandler;
+		StatusLedHandler* statusLedHandler;
+		GPSDataRepository* gpsRepository;
+		SDDataRepository* sdRepository;
+		TinyGPSPlus gps;
+		byte gpsPrecision, gpsWriteDelay, gpsFixTimeout;
+		unsigned long writeTimer, fixLedTimer, gpsFixTimer;
+		bool gpsFixed = false;
 };
 
 #endif

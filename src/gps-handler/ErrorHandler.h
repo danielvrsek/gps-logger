@@ -6,7 +6,7 @@
 enum Error
 {
   SDCARD_ERROR = 5,
-  EEPROM_ERROR
+  EEPROM_ERROR = 6
 };
 
 class ErrorHandler

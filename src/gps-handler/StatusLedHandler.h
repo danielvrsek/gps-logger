@@ -9,7 +9,7 @@ class StatusLedHandler
 {
   public:
     static StatusLedHandler* Instance();
-    void handle();
+    void loop();
     void blink(byte amount, uint16_t delay);
     void blinkError(byte amount);
   private:
