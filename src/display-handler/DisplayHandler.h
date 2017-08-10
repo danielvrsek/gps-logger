@@ -18,7 +18,9 @@ class DisplayHandler
 		void begin();
 		void drawFilename(char* filename);
 		void drawBluetoothIcon();
+		void clearBluetoothIcon();
 		void drawGpsIcon();
+		void clearGpsIcon();
 		void drawDataTitle(DataTitle titleText);
 		void drawData(uint32_t data, uint8_t decimalPlaces);
 		void drawSpeed(uint8_t speed);

@@ -1,7 +1,7 @@
 #ifndef SDFILESERVICE_H
 #define SDFILESERVICE_H
 
-#include <SD.h>
+#include <SdFat.h>
 #include <SPI.h>
 #include "ErrorHandler.h"
 #include "ConfigurationDataRepository.h"
@@ -31,6 +31,7 @@ class SDFileService
 	private:
 		SDFileService();
 		FileCounter fileCounter;
+		SdFat SD;
 		
 		static SDFileService* p_instance;
 };

@@ -21,8 +21,8 @@ SDFileService::SDFileService()
 }
 
 void SDFileService::begin()
-{
-	if (!SD.begin(SDCARD_SS_PIN)) 
+{	
+	if (!SD.begin(SDCARD_SS_PIN))
 		Serial.println("Could not initialize SD card.");
 }
 

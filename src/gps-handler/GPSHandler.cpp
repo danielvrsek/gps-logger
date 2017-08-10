@@ -1,74 +1,83 @@
 #include "GPSHandler.h"
 
-int freeRam();
+NeoSWSerial gpsSerial(GPS_RX_PIN, GPS_TX_PIN);
 
 void GPSHandler::begin()
 {
-	writeTimer = fixLedTimer = gpsFixTimer = 0;
+	gpsSerial.begin(9600);
 	
+	if (!display)
+	{
+		display = new DisplayHandler;
+		display->begin();
+		displayRequiresDelete = true;
+	}
+	
+	gpsRepository = new GPSDataRepository();
+	sdRepository = new SDDataRepository(SDFileService::Instance());
 	functionButtonHandler = new FunctionButtonHandler(this);
 	statusLedHandler = StatusLedHandler::Instance();
-	
-	ConfigurationDataRepository config;
-
-	config.gpsPrecision.setDefault();
-	config.gpsWriteDelay.setDefault();
-	config.gpsFixTimeout.setDefault();
-  
-	gpsPrecision = config.gpsPrecision.value();
-	gpsWriteDelay = config.gpsWriteDelay.value();
-	gpsFixTimeout = config.gpsFixTimeout.value();
-    
-	Serial.println(freeRam());
-	
-	pinMode(FIX_LED, OUTPUT);
-	digitalWrite(FIX_LED, LOW);
 }
 
 void GPSHandler::loop()
 {
-	while (Serial.available() > 0)
+	while (gps.available(gpsSerial))
 	{
-		char c = Serial.read();
-		Serial.print(c);
-		gps.encode(c);
+		gps_fix fix_data = gps.read();
+		gpsRepository->updateGpsFix(fix_data);
+		Serial.println("Updated");
 	}
+	gpsRepository->updateGpsStatus();
 
 	statusLedHandler->loop();
 	functionButtonHandler->loop();
-	fixLedHandle();
-  
-	if (isGPSReady() && isTimeToWrite()) 
+	
+	if (millis() - displayUpdateTimer > 1000)
 	{
-		GPSDataRepository gpsRepository = GPSDataRepository(&gps);
-		SDDataRepository sdRepository = SDDataRepository(SDFileService::Instance());
-		
-		sdRepository.writeNewPoint(gpsRepository.getCurrentPoint());
+		displayUpdateTimer = millis();
+		updateDisplay();
 	}
+  
+	/*if (gpsRepository->isGpsFixed() && isTimeToWrite()) 
+	{
+		sdRepository->writeNewPoint(gpsRepository->getCurrentPoint());
+	}*/
 }
 
-bool GPSHandler::isGPSReady()
+void GPSHandler::updateDisplay()
 {
-	if (gps.location.age() < 2000 && gps.hdop.value() / 100 <= gpsPrecision)
+	bool gpsFixed = gpsRepository->isGpsFixed();
+	
+	GPSPoint point = gpsRepository->getCurrentPoint();
+		
+	display->drawSpeed((uint8_t)point.speed);
+	display->drawData(gpsRepository->getTraveledDistance(), 2);
+	
+	if (gpsFixed && !gpsIconState)
+		changeGpsIconState(true);
+	else if (!gpsFixed && gpsIconState)
+		changeGpsIconState(false);
+	else if (!gpsFixed && !gpsIconState)
+		changeGpsIconState(true);
+}
+
+void GPSHandler::changeGpsIconState(bool state)
+{	
+	if (state)
 	{
-		if (!gpsFixed) digitalWrite(FIX_LED, HIGH);
-		gpsFixTimer = millis();
-        
-		return gpsFixed = true;    
-	}	
-  
-	if (gpsFixed && millis() - gpsFixTimer < gpsFixTimeout * 1000)
-	{
-		gpsFixed = true;
-		return false;
+		display->drawGpsIcon();
+		gpsIconState = true;
 	}
-  
-	return gpsFixed = false;
+	else
+	{
+		display->clearGpsIcon();
+		gpsIconState = false;
+	}
 }
 
 bool GPSHandler::isTimeToWrite()
 {
-	if (millis() - writeTimer > gpsWriteDelay * 1000)
+	if (millis() - writeTimer > 5 * 1000)
 	{      
 		writeTimer = millis();
 
@@ -76,17 +85,6 @@ bool GPSHandler::isTimeToWrite()
 	}
 
 	return false;
-}
-
-void GPSHandler::fixLedHandle()
-{
-	if (gpsFixed && isGPSReady()) return;
-  
-	if (!gpsFixed && millis() - fixLedTimer > FIX_LED_DELAY)
-	{
-		digitalWrite(FIX_LED, !digitalRead(FIX_LED));
-		fixLedTimer = millis();
-	}
 }
 
 void GPSHandler::displayGPSPoint(GPSPoint gpsPoint)
@@ -104,26 +102,25 @@ void GPSHandler::displayGPSPoint(GPSPoint gpsPoint)
 
 void GPSHandler::onNewPoiPressed()
 {
-	GPSDataRepository gpsRepository = GPSDataRepository(&gps);
-	SDDataRepository sdRepository = SDDataRepository(SDFileService::Instance());
-	
-	GPSPoint point = gpsRepository.getCurrentPoint();
+	GPSPoint point = gpsRepository->getCurrentPoint();
 	GPSWaypoint* p_waypoint = (GPSWaypoint*)&point;
 	
 	p_waypoint->waypointType = WaypointType::Poi;
 
-	sdRepository.writeNewWaypoint(*p_waypoint);
+	sdRepository->writeNewWaypoint(*p_waypoint);
 }
 
 void GPSHandler::onNewTrackingPressed()
 {
-	GPSDataRepository gpsRepository = GPSDataRepository(&gps);
-	SDDataRepository sdRepository = SDDataRepository(SDFileService::Instance());
-	
-	sdRepository.createNewTrack(gpsRepository.getCurrentPoint());
+	sdRepository->createNewTrack(gpsRepository->getCurrentPoint());
 }
 
 GPSHandler::~GPSHandler()
 {
 	delete functionButtonHandler;
+	delete gpsRepository;
+	delete sdRepository;
+	
+	if (displayRequiresDelete)
+		delete display;
 }

@@ -135,6 +135,16 @@ void DisplayHandler::drawGpsIcon()
 	iconPrinter.print(Point(118, 0), &gpsIcon);
 }
 
+void DisplayHandler::clearGpsIcon()
+{
+	lcd.clearArea(118, 0, 9, 15);
+}
+
+void DisplayHandler::clearBluetoothIcon()
+{
+	lcd.clearArea(105, 0, 9, 15);
+}
+
 void DisplayHandler::drawBluetoothIcon()
 {
 	BluetoothIcon btIcon = BluetoothIcon();

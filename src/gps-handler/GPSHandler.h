@@ -12,13 +12,15 @@ class GPSHandler;
 #include "SDDataRepository.h"
 #include "SDFileService.h"
 #include "ConfigurationDataRepository.h"
+#include "../display-handler/DisplayHandler.h"
+
+#include "../neo-swserial/NeoSWSerial.h"
+#include "../neo-gps/NMEAGPS.h"
 
 // Receive pin for SoftwareSerial
-#define GPS_RX_PIN 5
+#define GPS_RX_PIN 7
 // Transmit pin for SoftwareSerial
-#define GPS_TX_PIN 6
-// Pin, where FIX led is connected
-#define FIX_LED 5
+#define GPS_TX_PIN 2
 
 // Fix led blinks while gps is not fixed
 #define FIX_LED_DELAY 300
@@ -26,26 +28,30 @@ class GPSHandler;
 class GPSHandler
 {
 	public:
+		GPSHandler() { }
+		GPSHandler(DisplayHandler* display) : display(display) { }
 		~GPSHandler();
 		
 		void loop();
 		void begin();
-	
+			
 		void onNewTrackingPressed();
 		void onNewPoiPressed();
    
 	private:
-		bool isGPSReady();
+		void updateDisplay();
+		void changeGpsIconState(bool state);
 		bool isTimeToWrite();
 		void displayGPSPoint(GPSPoint gpsPoint);
-		void fixLedHandle();
 
+		GPSDataRepository* gpsRepository;
+		SDDataRepository* sdRepository;
 		FunctionButtonHandler* functionButtonHandler;
 		StatusLedHandler* statusLedHandler;
-		TinyGPSPlus gps;
-		byte gpsPrecision, gpsWriteDelay, gpsFixTimeout;
-		unsigned long writeTimer, fixLedTimer, gpsFixTimer;
-		bool gpsFixed = false;
+		DisplayHandler* display;
+		NMEAGPS gps;
+		unsigned long writeTimer = 0, displayUpdateTimer = 0;
+		bool gpsIconState = true, displayRequiresDelete = false;
 };
 
 #endif
